@@ -45,7 +45,7 @@ codepulse/
 
 ---
 
-## 🚀 Local Setup
+ Local Setup
 
 ### 1. Clone and create virtual environment
 ```bash
@@ -90,83 +90,11 @@ python app.py
 
 *Note: Free tier instances spin down after 50 seconds of inactivity, which causes a 30-50s loading delay on first startup.*
 
-### Option B: Deploying on PythonAnywhere (Persistent SQLite)
-1. Sign up for a free account on [PythonAnywhere](https://www.pythonanywhere.com/).
-2. Open a **Bash Console** and clone your repo, create a virtual environment, and install dependencies.
-3. In the **Web** tab, create a new manual configuration web app pointing to your project directory.
-4. Set the virtualenv path under the web configurations.
-5. Create a `.env` file in the project folder with your API keys.
-6. Edit the auto-generated WSGI configuration file in their editor to load `.env` and start `create_app()`:
-   ```python
-   from dotenv import load_dotenv
-   import sys, os
-   path = '/home/yourusername/codepulse'
-   sys.path.insert(0, path)
-   load_dotenv(os.path.join(path, '.env'))
-   from app import create_app
-   application = create_app()
-   ```
-7. Click **Reload** to go live!
+
+
+*
 
 ---
 
-## 🗄️ Database Schema
-
-**`analyses` table**
-
-| Column | Type | Description |
-|---|---|---|
-| id | Integer PK | Auto-increment identifier |
-| username | String | GitHub username |
-| slug | String UNIQUE | URL-safe caching link |
-| created_at | DateTime | Generation timestamp |
-| profile_data | Text (JSON) | GitHub user profile info |
-| repo_data | Text (JSON) | Top repository attributes |
-| language_data | Text (JSON) | Language % breakdown |
-| commit_activity | Text (JSON) | 26-week commit history array |
-| ai_persona | Text | AI-generated persona summary |
-| ai_strengths | Text (JSON) | Computed strengths list |
-| ai_gaps | Text (JSON) | Identified gaps list |
-| ai_suggestions | Text (JSON) | Specific suggestions list |
-| ai_score | Integer | 0–100 portfolio score |
-| ai_role_fit | Text (JSON) | Career role suggestions |
-
 ---
 
-## 🔌 API Endpoints
-
-| Method | URL | Description |
-|---|---|---|
-| GET | `/` | Landing page |
-| POST | `/analyze` | Submit username, trigger Groq analysis |
-| GET | `/report/<slug>` | View HTML report |
-| GET | `/api/report/<slug>` | JSON API response |
-| GET | `/history` | History database log |
-
----
-
-## 🎤 Interview Questions & Answers
-
-### Q1: Why Flask over Django?
-> "This project has a small scope — 4 routes, 1 model. Flask's minimal footprint meant faster development without unnecessary boilerplate. If the project were to scale (user auth, admin panel, complex ORM relationships), Django would be the right call."
-
-### Q2: How does the SQLite caching work?
-> "Each analysis is stored in the `analyses` table with a `created_at` timestamp. On `/analyze`, I first query for an existing row with the same username within the last 24 hours. If found, I redirect to the cached report — skipping both GitHub API and Groq API calls. This keeps the app fast and avoids rate limits."
-
-### Q3: Explain the Groq AI integration.
-> "I build a structured prompt with the user's GitHub data — repos, languages, stats — and send it to `llama-3.3-70b-versatile` via the Groq SDK. I instruct the model to respond only in JSON with a specific schema (persona, score, strengths, gaps, suggestions, role_fit) and enforce this using Groq's JSON mode. I parse the response with `json.loads()`."
-
-### Q4: What's SQLAlchemy ORM and why use it?
-> "SQLAlchemy ORM maps Python classes to database tables. Instead of writing raw SQL like `INSERT INTO analyses VALUES (...)`, I create an `Analysis` object and call `db.session.add()`. It makes the code database-agnostic — I can swap SQLite for PostgreSQL by just changing the `DATABASE_URL` environment variable, with zero code changes."
-
-### Q5: How would you scale this to handle 1000 users/day?
-> "Three changes: (1) Replace SQLite with PostgreSQL for concurrent writes. (2) Add a task queue like Celery + Redis so analysis jobs run async — the user gets a 'processing' page instead of waiting 10 seconds. (3) Cache GitHub API responses in Redis with a 1-hour TTL to avoid hitting rate limits."
-
-### Q6: What is OOP used in this project?
-> "The `Analysis` model is an OOP class with `@property` decorators that serialize/deserialize JSON columns transparently. The service layer (`github_service.py`, `ai_service.py`) uses pure functions with single responsibility — easy to test in isolation. The Flask Blueprint (`routes.py`) encapsulates all route handlers."
-
----
-
-## 📄 License
-
-MIT License — free to use, modify, and deploy.
