@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Analysis History — CodePulse{% endblock %}
+
+{% block content %}
+<div class="history-page">
+  <h1 class="page-title">Analysis History</h1>
+  <p class="page-sub">All GitHub profiles analyzed by CodePulse</p>
+
+  {% if analyses %}
+  <div class="history-table-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Developer</th>
+          <th>Repos</th>
+          <th>Top Language</th>
+          <th>Score</th>
+          <th>Role Fit</th>
+          <th>Analyzed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in analyses %}
+        <tr>
+          <td>
+            <div class="table-user">
+              <img src="{{ a.profile_data.avatar_url }}" class="table-avatar" />
+              <div>
+                <div class="table-name">{{ a.profile_data.name or a.username }}</div>
+                <div class="table-handle">@{{ a.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ a.profile_data.public_repos }}</td>
+          <td>
+            {% set langs = a.language_data %}
+            {% if langs %}
+              <span class="lang-badge">{{ langs.keys() | list | first }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="score-pill {% if a.ai_score >= 70 %}score-high{% elif a.ai_score >= 40 %}score-mid{% else %}score-low{% endif %}">
+              {{ a.ai_score }}
+            </span>
+          </td>
+          <td>
+            {% for role in a.role_fit_list[:2] %}
+            <span class="role-tag-sm">{{ role }}</span>
+            {% endfor %}
+          </td>
+          <td class="table-date">{{ a.created_at.strftime('%b %d, %Y') }}</td>
+          <td><a href="{{ url_for('main.report', slug=a.slug) }}" class="view-link">View →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <p>No analyses yet. <a href="{{ url_for('main.index') }}">Analyze a profile →</a></p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

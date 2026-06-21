@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}CodePulse — AI GitHub Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">AI-Powered · Instant · Free</div>
+    <h1>Decode any GitHub profile<br><span class="accent">with AI intelligence</span></h1>
+    <p class="hero-sub">
+      Enter a GitHub username to get an AI-generated developer persona, skill analysis,
+      language breakdown, and actionable career suggestions — in seconds.
+    </p>
+
+    <form action="{{ url_for('main.analyze') }}" method="POST" class="search-form">
+      <div class="search-row">
+        <span class="gh-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        </span>
+        <input
+          type="text"
+          name="username"
+          placeholder="github-username"
+          class="search-input"
+          required
+          autocomplete="off"
+        />
+        <button type="submit" class="search-btn">Analyze ⚡</button>
+      </div>
+      {% if error %}
+      <p class="error-msg">⚠️ {{ error }}</p>
+      {% endif %}
+    </form>
+
+    <div class="hero-stats">
+      <div class="stat"><strong>AI</strong><span>Persona Report</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><strong>Charts</strong><span>Visual Insights</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><strong>Score</strong><span>Portfolio Rating</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><strong>Roles</strong><span>Career Fit</span></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="pulse-card">
+      <div class="pulse-header">
+        <div class="pulse-avatar">JS</div>
+        <div>
+          <div class="pulse-name">john-dev</div>
+          <div class="pulse-sub">Full-stack · Python, JS · 3 yrs</div>
+        </div>
+        <div class="pulse-score">82</div>
+      </div>
+      <div class="pulse-persona">
+        "A backend-leaning developer with strong Python fundamentals and a growing ML portfolio. Builds practical tools with real-world impact."
+      </div>
+      <div class="pulse-tags">
+        <span class="role-tag">Backend Engineer</span>
+        <span class="role-tag">ML Engineer</span>
+        <span class="role-tag">DevOps</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if recent %}
+<section class="recent-section">
+  <h2 class="section-title">Recent Analyses</h2>
+  <div class="recent-grid">
+    {% for a in recent %}
+    <a href="{{ url_for('main.report', slug=a.slug) }}" class="recent-card">
+      <img src="{{ a.profile_data.avatar_url }}" alt="{{ a.username }}" class="recent-avatar" />
+      <div class="recent-info">
+        <div class="recent-name">{{ a.username }}</div>
+        <div class="recent-meta">{{ a.profile_data.public_repos }} repos · Score {{ a.ai_score }}</div>
+      </div>
+      <div class="recent-score {% if a.ai_score >= 70 %}score-high{% elif a.ai_score >= 40 %}score-mid{% else %}score-low{% endif %}">
+        {{ a.ai_score }}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="features-section">
+  <h2 class="section-title">What CodePulse analyzes</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feat-icon">🧠</div>
+      <h3>AI Developer Persona</h3>
+      <p>Groq AI reads your repos and generates a natural-language description of your developer identity, focus areas, and style.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📊</div>
+      <h3>Language Distribution</h3>
+      <p>Doughnut chart showing your language breakdown across all non-forked repos — see where your expertise lives.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📈</div>
+      <h3>Commit Activity</h3>
+      <p>26-week activity bar chart pulled from your top repos. Shows consistency and coding momentum to recruiters.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🎯</div>
+      <h3>Portfolio Score</h3>
+      <p>A 0–100 score based on repo quality, documentation, diversity, stars, and engagement. Improve it with AI suggestions.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">⚡</div>
+      <h3>Career Role Fit</h3>
+      <p>AI identifies the top 3 roles you're best suited for based on your actual work — not just your listed skills.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🔗</div>
+      <h3>Shareable URL</h3>
+      <p>Every report gets a permanent link. Share it in job applications, LinkedIn, or cold outreach to stand out.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
